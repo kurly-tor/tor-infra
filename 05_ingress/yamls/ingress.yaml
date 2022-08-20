@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+    name: tor-ingress
+    namespace: tor
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      kubernetes.io/ingress.calss: "nginx"
+spec:
+    rules:
+    - host: www.tor-kurly.com
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+             serviceName: tor-gateway-svc
+             servicePort: 8088
