@@ -6,29 +6,6 @@ GRANT ALL PRIVILEGES ON kurly.* TO 'kurly'@'localhost';
 FLUSH PRIVILEGES;
 
 
-create table category
-(
-    categoryName       varchar(50)                        not null
-        primary key,
-    parentCategoryName varchar(50)                        null,
-    createdAt          datetime default CURRENT_TIMESTAMP null,
-    updatedAt          datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint category_category_parentCategoryName_fk
-        foreign key (parentCategoryName) references category (categoryName)
-            on update cascade on delete cascade
-)
-    collate = utf8mb4_general_ci;
-
-create table filter
-(
-    filterName  varchar(100)                       not null
-        primary key,
-    description varchar(200)                       null,
-    createdAt   datetime default CURRENT_TIMESTAMP null,
-    updatedAt   datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP
-)
-    collate = utf8mb4_general_ci;
-
 create table user
 (
     userNumber bigint auto_increment,
@@ -44,7 +21,21 @@ create table user
     constraint user_userNumber_uindex
         unique (userNumber)
 )
-    collate = utf8mb4_general_ci;
+    charset = utf8mb4;
+
+create table category
+(
+    categoryName       varchar(50)                        not null
+        primary key,
+    parentCategoryName varchar(50)                        null,
+    createdAt          datetime default CURRENT_TIMESTAMP null,
+    updatedAt          datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    constraint category_category_parentCategoryName_fk
+        foreign key (parentCategoryName) references category (categoryName)
+            on update cascade on delete cascade
+)
+    charset = utf8mb4;
+
 create table product
 (
     productId    bigint auto_increment
@@ -63,10 +54,7 @@ create table product
     constraint product_category_categoryName_fk
         foreign key (categoryName) references category (categoryName)
 )
-    collate = utf8mb4_general_ci;
-
-)
-    collate = utf8mb4_general_ci;
+    charset = utf8mb4;
 
 create table preset
 (
@@ -82,9 +70,13 @@ create table preset
     createdAt     datetime default CURRENT_TIMESTAMP null,
     updatedAt     datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint preset_presetName_uindex
-        unique (presetName)
+        unique (presetName),
+    constraint preset_category_categoryName_fk
+        foreign key (categoryName) references category (categoryName),
+    constraint preset_user_userId_fk
+        foreign key (producer) references user (userId)
 )
-    collate = utf8mb4_general_ci;
+    charset = utf8mb4;
 
 create table preset_detail
 (
@@ -93,25 +85,12 @@ create table preset_detail
     productId    int                                not null,
     createdAt    datetime default CURRENT_TIMESTAMP null,
     updatedAt    datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    constraint preset_detail_category_categoryName_fk
+        foreign key (categoryName) references category (categoryName),
     constraint preset_detail_preset_presetId_fk
         foreign key (presetId) references preset (presetId)
 )
-    collate = utf8mb4_general_ci;
-
-
-create table purchase_history
-(
-    userId    varchar(20)                        not null,
-    productId bigint                             not null,
-    count     int      default 1                 not null,
-    createdAt datetime default CURRENT_TIMESTAMP null,
-    updatedAt datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint purchase_history_product_productId_fk
-        foreign key (productId) references product (productId),
-    constraint purchase_history_user_userId_fk
-        foreign key (userId) references user (userId)
-)
-    collate = utf8mb4_general_ci;
+    charset = utf8mb4;
 
 create table cart
 (
@@ -125,69 +104,22 @@ create table cart
     constraint cart_user_userId_fk
         foreign key (userId) references user (userId)
 )
-    collate = utf8mb4_general_ci;
+    charset = utf8mb4;
 
-create table preset_preferences
+create table purchase_history
 (
-    userNumber bigint                             not null,
-    presetId   bigint                             not null,
-    preference float                              not null,
-    createdAt  datetime default CURRENT_TIMESTAMP null,
-    primary key (userNumber, presetId)
-)
-    collate = utf8mb4_general_ci;
-
-create index presetId
-    on preset_preferences (presetId);
-
-create index userNumber
-    on preset_preferences (userNumber);
-
-create table product_preferences
-(
-    userNumber bigint                             not null,
-    productId  bigint                             not null,
-    preference float                              not null,
-    createdAt  datetime default CURRENT_TIMESTAMP null,
-    primary key (userNumber, productId),
-    constraint product_preferences_product_productId_fk
+    userId    varchar(20)                        not null,
+    productId bigint                             not null,
+    count     int      default 1                 not null,
+    createdAt datetime default CURRENT_TIMESTAMP null,
+    updatedAt datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    constraint purchase_history_product_productId_fk
         foreign key (productId) references product (productId),
-    constraint product_preferences_user_userNumber_fk
-        foreign key (userNumber) references user (userNumber)
-)
-    collate = utf8mb4_general_ci;
-
-create index productId
-    on product_preferences (productId);
-
-create index userNumber
-    on product_preferences (userNumber);
-
-create table user_category_binding
-(
-    userId       varchar(20)                        not null,
-    categoryName varchar(100)                       not null,
-    createdAt    datetime default CURRENT_TIMESTAMP null,
-    updatedAt    datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint user_category_binding_category_categoryName_fk
-        foreign key (categoryName) references category (categoryName),
-    constraint user_category_binding_user_userId_fk
+    constraint purchase_history_user_userId_fk
         foreign key (userId) references user (userId)
 )
-    collate = utf8mb4_general_ci;
+    charset = utf8mb4;
 
-create table user_filter_binding
-(
-    userId     varchar(20)                        not null,
-    filterName varchar(100)                       not null,
-    createdAt  datetime default CURRENT_TIMESTAMP null,
-    updatedAt  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint user_filter_binding_filter_filterName_fk
-        foreign key (filterName) references filter (filterName),
-    constraint user_filter_binding_user_userId_fk
-        foreign key (userId) references user (userId)
-)
-    collate = utf8mb4_general_ci;
 
 create table user_preset_binding
 (
@@ -202,4 +134,40 @@ create table user_preset_binding
     constraint user_preset_binding_user_userId_fk
         foreign key (userId) references user (userId)
 )
-    collate = utf8mb4_general_ci;
+    charset = utf8mb4;
+
+create table product_preferences
+(
+    userNumber bigint                             not null,
+    productId  bigint                             not null,
+    preference float                              not null,
+    createdAt  datetime default CURRENT_TIMESTAMP null,
+    primary key (userNumber, productId),
+    constraint product_preferences_product_productId_fk
+        foreign key (productId) references product (productId),
+    constraint product_preferences_user_userNumber_fk
+        foreign key (userNumber) references user (userNumber)
+)
+    charset = utf8mb4;
+
+create index productId
+    on product_preferences (productId);
+
+create index userNumber
+    on product_preferences (userNumber);
+
+create table preset_preferences
+(
+    userNumber bigint                             not null,
+    presetId   bigint                             not null,
+    preference float                              not null,
+    createdAt  datetime default CURRENT_TIMESTAMP null,
+    primary key (userNumber, presetId)
+)
+    charset = utf8mb4;
+
+create index presetId
+    on preset_preferences (presetId);
+
+create index userNumber
+    on preset_preferences (userNumber);
