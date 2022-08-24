@@ -30,6 +30,8 @@
         mysql -u root -p
         // copy & paste init_setting.sql
 ```
+<img width="570" alt="image" src="https://user-images.githubusercontent.com/38160893/186341235-6127d898-b9cb-49b0-9958-b22b143dbb4b.png">
+
 ## 04_elk
 ```
         // install elastic search
